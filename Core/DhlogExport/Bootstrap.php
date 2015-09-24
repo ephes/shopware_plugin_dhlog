@@ -10,7 +10,7 @@ class Shopware_Plugins_Core_DhlogExport_Bootstrap extends Shopware_Components_Pl
 
     public function getLabel()
     {
-        return 'Slogan of the day';
+        return 'Dhlog Export Plugin';
     }
 
     public function install()
@@ -20,61 +20,12 @@ class Shopware_Plugins_Core_DhlogExport_Bootstrap extends Shopware_Components_Pl
             'onFrontendPostDispatch'
         );
 
-        $this->createConfig();
-
         return true;
     }
     public function onFrontendPostDispatch(Enlight_Event_EventArgs $args)
     {
-        /** @var \Enlight_Controller_Action $controller */
-        $controller = $args->get('subject');
-        $view = $controller->View();
-
-        //$view->addTemplateDir(
-        //    __DIR__ . '/Views'
-        //);
-        $view->addTemplateDir($this->Path() . 'Views');
-
-        $view->assign('slogan', $this->getSlogan());
-        $view->assign('sloganSize', $this->Config()->get('font-size'));
-        $view->assign('italic', $this->Config()->get('italic'));
-
-    }
-
-    public function getSlogan()
-    {
         $this->exportCustomers();
         $this->exportOrders();
-        return array_rand(
-            array_flip(
-                array(
-                    'An apple a day keeps the doctor away',
-                    'Let’s get ready to rumble',
-                    'A rolling stone gathers no moss',
-                )
-            )
-        );
-    }
-    private function createConfig()
-    {
-        $this->Form()->setElement(
-            'select',
-            'font-size',
-            array(
-                'label' => 'Font size',
-                'store' => array(
-                    array(12, '12px'),
-                    array(18, '18px'),
-                    array(25, '25px')
-                ),
-                'value' => 12
-            )
-        );
-
-        $this->Form()->setElement('boolean', 'italic', array(
-            'value' => true,
-            'label' => 'Italic'
-        ));
     }
 
     public function exportCustomers()
