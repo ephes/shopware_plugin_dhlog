@@ -13,12 +13,35 @@ class Shopware_Plugins_Core_DhlogExport_Bootstrap extends Shopware_Components_Pl
         return 'Dhlog Export Plugin';
     }
 
+    private function createConfig()
+    {
+        $this->Form()->setElement(
+            'text',
+            'orders_path',
+            array(
+                'label' => 'path of orders export',
+                'value' => '/tmp/orders.xml'
+            )
+        );
+
+        $this->Form()->setElement(
+            'text',
+            'customers_path',
+            array(
+                'label' => 'path of customers export',
+                'value' => '/tmp/customers.xml'
+            )
+        );
+    }
+
     public function install()
     {
         $this->subscribeEvent(
             'Enlight_Controller_Action_PostDispatchSecure_Frontend',
             'onFrontendPostDispatch'
         );
+
+        $this->createConfig();
 
         return true;
     }
@@ -79,7 +102,7 @@ class Shopware_Plugins_Core_DhlogExport_Bootstrap extends Shopware_Components_Pl
             $customer_list->appendChild($order_customer);
         }
         $xml->appendChild($customer_list);
-        $xml->save("/tmp/customers.xml");
+        $xml->save($this->Config()->get('customers_path'));
     }
 
     public function getCustomers()
@@ -221,7 +244,7 @@ class Shopware_Plugins_Core_DhlogExport_Bootstrap extends Shopware_Components_Pl
             $order_list->appendChild($orders_elem);
         }
         $xml->appendChild($order_list);
-        $xml->save("/tmp/orders.xml");
+        $xml->save($this->Config()->get('orders_path'));
     }
 
     public function getOrders()
