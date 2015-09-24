@@ -1,0 +1,2 @@
+# shopware_plugin_dhlog
+shopware_plugin_dhlog
