@@ -38,13 +38,23 @@ class Shopware_Plugins_Core_DhlogExport_Bootstrap extends Shopware_Components_Pl
     {
         $this->subscribeEvent(
             'Enlight_Controller_Action_PostDispatchSecure_Frontend',
-            'onFrontendPostDispatch'
+            'onFrontendPostDispatch',
+            'Shopware_CronJob_DhlogExport',
+            'onRun'
         );
 
         $this->createConfig();
+        $this->createCronJob("Dhlog Export", "DhlogExport", 86400);
 
         return true;
     }
+
+    public function onRun(Enlight_Components_Cron_EventArgs $job)
+    {
+        $this->exportCustomers();
+        $this->exportOrders();
+    }
+
     public function onFrontendPostDispatch(Enlight_Event_EventArgs $args)
     {
         $this->exportCustomers();
