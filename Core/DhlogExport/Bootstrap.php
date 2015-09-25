@@ -36,29 +36,31 @@ class Shopware_Plugins_Core_DhlogExport_Bootstrap extends Shopware_Components_Pl
 
     public function install()
     {
+//        $this->subscribeEvent(
+//            'Enlight_Controller_Action_PostDispatchSecure_Frontend',
+//            'onFrontendPostDispatch'
+//        );
+
         $this->subscribeEvent(
-            'Enlight_Controller_Action_PostDispatchSecure_Frontend',
-            'onFrontendPostDispatch',
             'Shopware_CronJob_DhlogExport',
             'onRun'
         );
 
         $this->createConfig();
-        $this->createCronJob("Dhlog Export", "DhlogExport", 86400);
+        $this->createCronJob("Dhlog Export", "DhlogExport", 600);
 
         return true;
     }
 
     public function onRun(Enlight_Components_Cron_EventArgs $job)
     {
-        $this->exportCustomers();
-        $this->exportOrders();
+        $this->exportDhlog();
+
     }
 
     public function onFrontendPostDispatch(Enlight_Event_EventArgs $args)
     {
-        $this->exportCustomers();
-        $this->exportOrders();
+        $this->exportDhlog();
     }
 
     public function exportCustomers()
@@ -201,12 +203,14 @@ class Shopware_Plugins_Core_DhlogExport_Bootstrap extends Shopware_Components_Pl
         return $result;
     }
 
-    public function exportOrders()
+    public function exportDhlog()
     {
-        $elements = array("VSWERK", "VSHERK", "VSKDNR", "VSPJNR", "VSAUFN", "VSPOS", "VSAART", "VBEM",
-            "VSANR", "VSBPRS", "VSBMNG", "VSZA", "VSHERK", "VSNAME1V", "VSSTRV", "VSLANDV", "VSPLZV",
-            "VSORTV", "VSNAME1R", "VSSTRR", "VSLANDR", "VSPLZR", "VSORTR", "VSBSL1", "VSGRPZ");
-        $fixed_values = array(
+        $orders_elements = array(
+            "VSWERK", "VSHERK", "VSKDNR", "VSPJNR", "VSAUFN", "VSPOS", "VSAART", "VBEM",
+            "VSANR", "VSBPRS", "VSBMNG", "VSZA", "VSHERK", "VSNAME1V", "VSSTRV", "VSLANDV",
+            "VSPLZV", "VSORTV", "VSNAME1R", "VSSTRR", "VSLANDR", "VSPLZR", "VSORTR",
+            "VSBSL1", "VSGRPZ");
+        $orders_fixed_values = array(
             "VSWERK" => "PE",
             "VSHERK" => "X1",
             "VSPJNR" => "0",
@@ -217,7 +221,7 @@ class Shopware_Plugins_Core_DhlogExport_Bootstrap extends Shopware_Components_Pl
             "VSBSL1" => "10",
             "VSGRPZ" => "3",
         );
-        $lookup = array(
+        $orders_lookup = array(
             "VSKDNR" => "userID",
             "VSAUFN" => "ordernumber",
             "VBEM" => "customercomment",
@@ -242,12 +246,12 @@ class Shopware_Plugins_Core_DhlogExport_Bootstrap extends Shopware_Components_Pl
         $order_list = $xml->createElement('orderlist');
         foreach ($orders as $order) {
             $orders_elem = $xml->createElement('orders');
-            foreach($elements as $elem_name) {
+            foreach($orders_elements as $elem_name) {
                 $element = $xml->createElement($elem_name);
-                if (array_key_exists($elem_name, $fixed_values)) {
-                    $element->nodeValue = $fixed_values[$elem_name];
+                if (array_key_exists($elem_name, $orders_fixed_values)) {
+                    $element->nodeValue = $orders_fixed_values[$elem_name];
                 } else {
-                    $element->nodeValue = $order[$lookup[$elem_name]];
+                    $element->nodeValue = $order[$orders_lookup[$elem_name]];
                 }
                 $orders_elem->appendChild($element);
             }
@@ -297,7 +301,6 @@ class Shopware_Plugins_Core_DhlogExport_Bootstrap extends Shopware_Components_Pl
               s_core_countries as sc
             ON
               s.countryID = sc.id
-
             JOIN
               s_order_billingaddress as b
             ON
