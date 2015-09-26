@@ -36,10 +36,10 @@ class Shopware_Plugins_Core_DhlogExport_Bootstrap extends Shopware_Components_Pl
 
     public function install()
     {
-        $this->subscribeEvent(
-            'Enlight_Controller_Action_PostDispatchSecure_Frontend',
-            'onFrontendPostDispatch'
-        );
+        //$this->subscribeEvent(
+        //    'Enlight_Controller_Action_PostDispatchSecure_Frontend',
+        //    'onFrontendPostDispatch'
+        //);
 
         $this->subscribeEvent(
             'Shopware_CronJob_DhlogExport',
@@ -299,6 +299,7 @@ class Shopware_Plugins_Core_DhlogExport_Bootstrap extends Shopware_Components_Pl
         }
         $xml->appendChild($order_list);
         $xml->save($this->Config()->get('orders_path'));
+        chmod($this->Config()->get('orders_path'), 0777);
     }
 
     public function exportCustomers($orderIds)
@@ -343,6 +344,7 @@ class Shopware_Plugins_Core_DhlogExport_Bootstrap extends Shopware_Components_Pl
         }
         $xml->appendChild($customer_list);
         $xml->save($this->Config()->get('customers_path'));
+        chmod($this->Config()->get('customers_path'), 0777);
     }
 
     public function exportDhlog()
